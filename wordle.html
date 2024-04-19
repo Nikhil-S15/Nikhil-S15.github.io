@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    #game-container {
+      margin-top: 20px;
+    }
+    
+    #feedback p {
+      margin-top: 10px;
+    }
+    
+    .feedback-letter {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+    }
+    
+    .feedback-letter.G {
+      background-color: green;
+      color: white;
+    }
+    
+    .feedback-letter.Y {
+      background-color: yellow;
+    }
+    
+    .feedback-letter.X {
+      background-color: gray;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="my-4">Wordle</h1>
+
+  <div id="game-container">
+    <label for="guess-input">Enter your guess:</label>
+    <input type="text" id="guess-input" maxlength="5" class="form-control">
+    <button id="guess-btn" class="btn btn-primary">Guess</button>
+    <p id="attempts-left">Attempts left: 6</p>
+    <div id="feedback"></div>
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const words = {
+      english: ["APPLE", "BANANA", "CHERRY", "LEMON", "GRAPE", "ORANGE"],
+      spanish: ["MANZANA", "PLATANO", "CEREZA", "LIMON", "UVA", "NARANJA"]
+    };
+    const language = 'english'; // Change to 'spanish' for Spanish words
+    const secretWord = words[language][Math.floor(Math.random() * words[language].length)];
+    const maxAttempts = 6;
+    let attemptsLeft = maxAttempts;
+
+    const guessInput = document.getElementById('guess-input');
+    const guessBtn = document.getElementById('guess-btn');
+    const feedbackDiv = document.getElementById('feedback');
+    const attemptsLeftDiv = document.getElementById('attempts-left');
+
+    guessBtn.addEventListener('click', handleGuess);
+
+    function handleGuess() {
+      const guess = guessInput.value.trim().toUpperCase();
+
+      if (!isValidWord(guess)) {
+        alert(`Please enter a valid ${language === 'english' ? 'English' : 'Spanish'} word.`);
+        guessInput.value = '';
+        return;
+      }
+
+      if (guess === secretWord) {
+        endGame(true);
+      } else {
+        displayFeedback(getFeedback(guess));
+        attemptsLeft--;
+        updateAttemptsLeft();
+        guessInput.value = '';
+        if (attemptsLeft === 0) {
+          endGame(false);
+        }
+      }
+    }
+
+    function isValidWord(word) {
+      return /^[A-Z]+$/.test(word) && words[language].includes(word);
+    }
+
+    function getFeedback(guess) {
+      let feedback = '';
+      for (let i = 0; i < 5; i++) {
+        if (guess[i] === secretWord[i]) {
+          feedback += '<span class="feedback-letter G">G</span>';
+        } else if (secretWord.includes(guess[i])) {
+          feedback += '<span class="feedback-letter Y">Y</span>';
+        } else {
+          feedback += '<span class="feedback-letter X">X</span>';
+        }
+      }
+      return feedback;
+    }
+
+    function displayFeedback(feedback) {
+      feedbackDiv.innerHTML += `<p>${feedback}</p>`;
+    }
+
+    function updateAttemptsLeft() {
+      attemptsLeftDiv.textContent = `Attempts left: ${attemptsLeft}`;
+    }
+
+    function endGame(isWinner) {
+      if (isWinner) {
+        alert(`Congratulations! You guessed the word "${secretWord}" correctly!`);
+      } else {
+        alert(`Sorry, you've run out of attempts. The correct word was "${secretWord}".`);
+      }
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+    }
+  });
+</script>
+</body>
+</html>
